@@ -1,0 +1,40 @@
+import React from 'react';
+import {Line} from 'react-chartjs-2';
+
+function LineChart(props) {
+	
+	const {
+		label = "Valores", 
+		data = {},
+	} = props;
+
+	datasets: 
+
+	return (
+		<Line
+			data={{
+		    labels: [1,2,3,4].map(() => "OK"),
+				datasets,
+//				datasets: [
+//					{ label: 'device01', data: [1,2,3,4] },
+//					{ label: 'device02', data: [4,3,2,1] },
+//				],
+		  }}
+		  options={{
+
+    legend: {
+        display: false
+    },
+		  	scales: {
+		    	yAxes: [{
+		        ticks: {
+							reverse: false
+		        }
+		      }]
+		    }
+			}}
+		/>
+	);
+}
+
+export default LineChart;
