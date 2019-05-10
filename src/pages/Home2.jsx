@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import FileSelector from '../components/FileSelector';
 import Card from '../components/Card';
-import ChartCard from '../components/ChartCard';
 import Slider from '../components/Slider';
 import RadarChart from '../components/RadarChart';
 import LineChart from '../components/ComposedLineChart';
-//import LineChart from '../components/LineChart';
 import Button from '../components/Button';
 import { sendMessage, startEmulator, stopEmulator } from '../utils/Emulator';
 import Dojot from '../utils/Dojot';
@@ -39,9 +36,9 @@ const styles = {
 	}
 };
 
-const {devicesToWatch, propertiesToWatch} = Configs;
+const {devicesToWatch, propertiesToWatch, lineColors} = Configs;
 
-console.log(devicesToWatch, propertiesToWatch);
+//console.log(devicesToWatch, propertiesToWatch, lineColors);
 
 function HomePage(props) {
 
@@ -50,17 +47,27 @@ function HomePage(props) {
 	} = props;
 
 	const attrs = [
-		{label: 'Temperatura', factor: 10, digits: 2},
-		{label: 'Pressao', factor: 0.5, digits: 2},
-		{label: 'Vibracao', factor: 20, digits: 2},
-		{label: 'RPM', factor: 150, digits: 0}];
+		{label: 'temperatura', offset: 70, factor: 8, digits: 2},
+		{label: 'pressao', offset: 1, factor: 0.4, digits: 2},
+		{label: 'vibracao', offset: 70, factor: 13, digits: 2},
+		{label: 'rpm', offset: 1300, factor: 20, digits: 0}];
 
 	let [ data, setData ] = useState({[attrs[0].label]: 5, [attrs[1].label]: 5, [attrs[2].label]: 5, [attrs[3].label]: 5});
-	let [ devicesData, setDevicesData ] = useState({})
-
 	let [ propertiesData, setPropertiesData ] = useState({});
-
 	let [ isEmulatorRunning, setEmulatorIsRunning ] = useState(false);
+
+  let resetDevicesData = () => {
+
+		devicesToWatch.map(({id}) => {
+			Object.keys(propertiesData).forEach(dataId => {
+				let propertyDevices = propertiesData[dataId] || {};
+
+				propertyDevices[id] = [];
+				propertiesData[dataId] = propertyDevices;
+			});
+			setPropertiesData({...propertiesData});
+		});
+	}
 
 	let toggleEmulator = () => {
 		if(isEmulatorRunning) {
@@ -74,7 +81,9 @@ function HomePage(props) {
 		} else {
 			startEmulator().then((results) => {
 				if (results.every((value) => value)) {
+					resetDevicesData();
 					setEmulatorIsRunning(true);
+					console.log('Start emulator!');
 				} else {
 					// Send notification: snackbar
 				}
@@ -86,47 +95,35 @@ function HomePage(props) {
 		let deviceId = data.metadata.deviceid;
 		let newData = data.attrs;
 
-		console.log('Device', deviceId, 'sent data', newData);
-//		let device = devicesData[deviceId] || {};
-		let deviceData = devicesData[deviceId] || {};
-//		console.log('DeviceData was', deviceData);
+		//console.log('Device', deviceId, 'sent data', newData);
 
 		Object.keys(newData).forEach(dataId => {
 			let dataValue = newData[dataId];
-			console.log('Adding data', dataValue, 'under key', dataId, 'to device', deviceId);
+			//console.log('Adding data', dataValue, 'under key', dataId, 'to device', deviceId);
 
+			/* All devices data for a specific attribute */
 			let propertyDevices = propertiesData[dataId] || {};
+			/* Device data array for a specific attribute */
 			let deviceEntries = propertyDevices[deviceId] || [];
 
+			/* Add the new value to device data */
 			deviceEntries.push(dataValue);
+
 			propertyDevices[deviceId] = deviceEntries;
 			propertiesData[dataId] = propertyDevices;
-
-			let keyData = deviceData[dataId] || [];
-			keyData.push(dataValue);
-			deviceData[dataId] = keyData;
-
 		});
 
-		console.log('DeviceData now is', deviceData);
-	//	device = deviceData;
-		devicesData[deviceId] = deviceData;
-
-		setDevicesData({...devicesData});
-		console.log('PROPERPOEA', propertiesData);
+		//console.log('PROPERPOEA', propertiesData);
 		setPropertiesData({...propertiesData});
-
 	}
 
 	let handleSliderChange = (id, value) => {
-		console.log('changing slider id', id, 'to', value);
+		//console.log('changing slider id', id, 'to', value);
 		data[id] = value;
 		setData({...data});
 	}
 
 	Dojot.onDeviceData(handleDeviceData);
-
-	console.log('DevicesData:', devicesData);
 
 	return (
 		<div className={classes.container}>
@@ -138,22 +135,22 @@ function HomePage(props) {
 	 				/>
 	 	
 	 				<Slider
-						label={attrs[0].label + ": " + (data[attrs[0].label] * attrs[0].factor).toFixed(attrs[0].digits)}
+						label={attrs[0].label + ": " + (attrs[0].offset + data[attrs[0].label] * attrs[0].factor).toFixed(attrs[0].digits)}
 	 					value={data[attrs[0].label]}
 	 					onChange={(e, val) => handleSliderChange(attrs[0].label, val)}
 	 				/>
 	 				<Slider
-					 	label={attrs[1].label + ": " + (data[attrs[1].label] * attrs[1].factor).toFixed(attrs[1].digits)}
+					 	label={attrs[1].label + ": " + (attrs[1].offset + data[attrs[1].label] * attrs[1].factor).toFixed(attrs[1].digits)}
 	 					value={data[attrs[1].label]}
 	 					onChange={(e, val) => handleSliderChange(attrs[1].label, val)}
 	 				/>
 	 				<Slider
-					 	label={attrs[2].label + ": " + (data[attrs[2].label] * attrs[2].factor).toFixed(attrs[2].digits)}
+					 	label={attrs[2].label + ": " + (attrs[2].offset + data[attrs[2].label] * attrs[2].factor).toFixed(attrs[2].digits)}
 	 					value={data[attrs[2].label]}
 	 					onChange={(e, val) => handleSliderChange(attrs[2].label, val)}
 	 				/>
 	 				<Slider
-					 	label={attrs[3].label + ": " + (data[attrs[3].label] * attrs[3].factor).toFixed(attrs[3].digits)}
+					 	label={attrs[3].label + ": " + (attrs[3].offset + data[attrs[3].label] * attrs[3].factor).toFixed(attrs[3].digits)}
 	 					value={data[attrs[3].label]}
 	 					onChange={(e, val) => handleSliderChange(attrs[3].label, val)}
 	 				/>
@@ -162,7 +159,7 @@ function HomePage(props) {
 	 					onClick={() => {
 							const newData = {};
 							attrs.forEach((item, index, arr) => {
-								newData[item.label] = parseFloat((data[item.label] * item.factor).toFixed(item.digits));
+								newData[item.label] = parseFloat((item.offset + data[item.label] * item.factor).toFixed(item.digits));
 							});
 							sendMessage(newData);
 						}}
@@ -175,18 +172,29 @@ function HomePage(props) {
 	 		<div className={classes.autoContentPanel}>
 	 			<Card label="Automático">
 					<div className={classes.lineChartPanel}>
-					{propertiesToWatch.map(({id}) => {
+					{propertiesToWatch.map(label => {
 
-						let propertyData = propertiesData[id] || {} ;
+						let propertyData = propertiesData[label] || {} ;
 
-						console.log('Property data for id', id, 'is', propertyData);
-						let data = Object.keys(propertyData).map(deviceId => { return {label: deviceId, data: propertyData[deviceId]} });
+						//console.log('Property data for', label, 'is', propertyData);
+						let data = devicesToWatch.filter(({id}) => { return propertyData.hasOwnProperty(id)}).map(({id, label, lineColor}) => {
+							//console.log('Data for device', label, ':', propertyData[id]);
+							return {
+								label: label,
+								data: propertyData[id],
+								fill: false,
+								backgroundColor: lineColor,
+								borderWidth: 1,
+								borderColor: lineColor,
+								pointRadius: 0
+							}
+						});
 	
-						console.log('Rendering chart with data:', data);
+						//console.log('Rendering chart with data:', data);
 
 		 	 			return (
 							<div className={classes.lineChartContentPanel}>
-							<Card label={id}>
+							<Card label={label}>
 					 			<LineChart
 					 				data={data}
 					 			/>

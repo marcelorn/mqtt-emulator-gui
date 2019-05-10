@@ -7,27 +7,27 @@ var mqttTopic = (deviceId) => {
 var getMessage = (deviceId, dataFile) => {  
     return {
         device: {
-            autoRestart: false,
+            autoRestart: true,
             id: deviceId,
             mqttTopic: mqttTopic(deviceId),
             frequency: 5000,
             sensors: [{
-                name: "Temperatura",
+                name: "temperatura",
                 value: `FILE(${dataFile}:1)`,
                 expression: "file",
                 expressionValues: [dataFile, "1"]
             }, {
-                name: "Pressao",
+                name: "pressao",
                 value: `FILE(${dataFile}:2)`,
                 expression: "file",
                 expressionValues: [dataFile, "2"]
             }, {
-                name: "Vibracao",
+                name: "vibracao",
                 value: `FILE(${dataFile}:3)`,
                 expression: "file",
                 expressionValues: [dataFile, "3"]
             }, {
-                name: "RPM",
+                name: "rpm",
                 value: `FILE(${dataFile}:4)`,
                 expression: "file",
                 expressionValues: [dataFile, "4"]
@@ -63,25 +63,27 @@ export function sendMessage(message) {
 
 export function startEmulator() {
     var promises = [];
-    Configs.devicesToEmulate.forEach((device, index, arr) => {
-        var body = JSON.stringify(getMessage(device.id, device.dataFile));
-        console.log(`Start emulator: ${body}`);
-        var promise = fetch(`${Configs.dojotHost}/mqtt-emulator/emulator/start`, {
-            method: 'POST',
-            mode: "cors",
-            body: body, // string or object
-            headers:{
-                'Content-Type': 'application/json'
-            }
-        }).then((response) => response.json())
-        .then(myJson => {
-            console.log(JSON.stringify(myJson))
-            return true;
-        }).catch(() => {
-            console.log("Can’t access response. Blocked by browser?");
-            return false;
-        });
-        promises.push(promise);
+    Configs.devicesToWatch.forEach((device, index, arr) => {
+        if (device.hasOwnProperty("dataFile")) {
+            var body = JSON.stringify(getMessage(device.id, device.dataFile));
+            console.log(`Start emulator: ${body}`);
+            var promise = fetch(`${Configs.dojotHost}/mqtt-emulator/emulator/start`, {
+                method: 'POST',
+                mode: "cors",
+                body: body, // string or object
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then((response) => response.json())
+            .then(myJson => {
+                console.log(JSON.stringify(myJson))
+                return true;
+            }).catch(() => {
+                console.log("Can’t access response. Blocked by browser?");
+                return false;
+            });
+            promises.push(promise);
+        }
     });
     console.log(`Done starting emulators!`);
     return Promise.all(promises);
@@ -89,24 +91,26 @@ export function startEmulator() {
 
 export function stopEmulator() {
     var promises = [];
-    Configs.devicesToEmulate.forEach((device, index, arr) => {
-        console.log(`Stop emulator for device ${device.id}`);
-        var promise = fetch(`${Configs.dojotHost}/mqtt-emulator/emulator/stop`, {
-            method: 'POST',
-            mode: "cors",
-            body: JSON.stringify({deviceId: device.id}), // string or object
-            headers:{
-                'Content-Type': 'application/json'
-            }
-        }).then((response) => response.json())
-        .then(myJson => {
-            console.log(JSON.stringify(myJson));
-            return true;
-        }).catch(() => {
-            console.log("Can’t access response. Blocked by browser?");
-            return false;
-        });
-        promises.push(promise);
+    Configs.devicesToWatch.forEach((device, index, arr) => {
+        if (device.hasOwnProperty("dataFile")) {
+            console.log(`Stop emulator for device ${device.id}`);
+            var promise = fetch(`${Configs.dojotHost}/mqtt-emulator/emulator/stop`, {
+                method: 'POST',
+                mode: "cors",
+                body: JSON.stringify({deviceId: device.id}), // string or object
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then((response) => response.json())
+            .then(myJson => {
+                console.log(JSON.stringify(myJson));
+                return true;
+            }).catch(() => {
+                console.log("Can’t access response. Blocked by browser?");
+                return false;
+            });
+            promises.push(promise);
+        }
     });
 
     return Promise.all(promises);

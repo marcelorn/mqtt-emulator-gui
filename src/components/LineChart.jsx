@@ -16,7 +16,8 @@ function LineChart(props) {
 			    {
 						label: 'Valor',
 			      data: data,
-		      	borderWidth: 1
+						borderWidth: 1,
+						fill: false
 		    	},	
 				]
 		  }}

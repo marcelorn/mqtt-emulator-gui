@@ -21,7 +21,7 @@ dojot.configure({host: Configs.dojotHost}).then(configuredClient => {
 	if(jwt) {
 		auth = configuredClient.initializeWithToken(jwt);
 	} else {
-		auth = configuredClient.initializeWithCredentials('admin', 'admin');
+		auth = configuredClient.initializeWithCredentials('admin', '@plAtIA.cpQd#');
 	}
 		
 	auth.then(initializedClient => {

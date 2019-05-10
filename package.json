@@ -2,7 +2,7 @@
   "name": "dojot-showcase",
   "version": "0.1.0",
   "private": true,
-  "homepage" : "http://localhost:8000/emulator-app",
+  "homepage" : "http://gcpdtc01:8000/mqtt-emulator-app",
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",

@@ -2,13 +2,13 @@ import React from 'react';
 import {Line} from 'react-chartjs-2';
 
 function LineChart(props) {
-	
+	//console.log('LineChart: props=', props);
 	const {
 		label = "Valores", 
 		data = {},
 	} = props;
 
-	let datasets = data || []; 
+	const datasets = data || []; 
 
 	let maxLength = 0;
 
@@ -18,31 +18,31 @@ function LineChart(props) {
 			maxLength = dsData.length;
 		}
 	});
+	
+	//console.log('LineChart: datasets=', datasets, 'maxLength=', maxLength);
+
+	const chartData = {
+		labels: new Array(maxLength),
+		datasets: datasets
+	}
+
+	const options = {
+		legend: {
+			display: false
+		},
+		scales: {
+			yAxes: [{
+				ticks: {
+					reverse: false
+				}
+			}]
+		}
+	}
+
+	console.log(`ChartData: data=${JSON.stringify(chartData)} options=${JSON.stringify(options)}`);
 
 	return (
-		<Line
-			data={{
-		    labels: (new Array(maxLength)).map(() => "OK"),
-				datasets,
-//				datasets: [
-//					{ label: 'device01', data: [1,2,3,4] },
-//					{ label: 'device02', data: [4,3,2,1] },
-//				],
-		  }}
-		  options={{
-
-    legend: {
-        display: false
-    },
-		  	scales: {
-		    	yAxes: [{
-		        ticks: {
-							reverse: false
-		        }
-		      }]
-		    }
-			}}
-		/>
+		<Line data={chartData} options={options} redraw/>
 	);
 }
 

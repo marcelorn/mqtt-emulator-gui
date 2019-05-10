@@ -13,6 +13,8 @@ import {
 import teal from '@material-ui/core/colors/teal';
 import lime from '@material-ui/core/colors/lime';
 
+import Configs from './configs';
+
 const theme = createMuiTheme({
 	palette: {
 		primary: teal,
@@ -32,8 +34,8 @@ function App(props) {
 		<AppBar title="Emulador">
 			<AppContent>
 				<Switch>
-					<Route path="/" exact component={HomePage} />
-					<Redirect to="/" /> 
+					<Route path={Configs.path} exact component={HomePage} />
+					<Redirect to={Configs.path} /> 
 				</Switch>
 			</AppContent>
 		</AppBar>
